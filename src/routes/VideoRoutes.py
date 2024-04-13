@@ -56,9 +56,22 @@ def get_tasks():
 @main.route('/tasks/<int:id_task>', methods=['GET'])
 def get_one_tasks(id_task):
     has_access = AuthenticationService.verify_token(request.headers)
-    print(id_task)
+
     if has_access:
         response = VideoUploadService.get_one_task(id_task=id_task)
+        return response
+    else:
+        response = jsonify({'message': 'Unauthorized'})
+        return response, 401
+
+
+@main.route('/tasks/<int:id_task>', methods=['DELETE'])
+def delete_one_tasks(id_task):
+    has_access = AuthenticationService.verify_token(request.headers)
+    user_id = AuthenticationService.get_id_from_token(request.headers)
+
+    if has_access:
+        response = VideoUploadService.delete_one_task(id_task=id_task, user_id=user_id)
         return response
     else:
         response = jsonify({'message': 'Unauthorized'})

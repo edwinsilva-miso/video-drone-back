@@ -18,6 +18,7 @@ class Video(Base):
     description = Column(String)
     path = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
+    video_id = Column(String)
     status = Column(sqlalchemy.Enum(StatusVideo))
     timestamp = Column(DateTime, default=datetime.datetime.now())
 
