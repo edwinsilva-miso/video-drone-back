@@ -28,8 +28,27 @@ def upload_video():
         user_id = AuthenticationService.get_id_from_token(request.headers)
         response = VideoUploadService.upload(description, random_name, user_id)
 
-        asyncio.run(VideoUploadService.save_video(video_file, random_name))  # Use asyncio.run() to execute the coroutine
+        asyncio.run(VideoUploadService.save_video(video_file, random_name))
         return {'status': response}
+    else:
+        response = jsonify({'message': 'Unauthorized'})
+        return response, 401
+
+
+@main.route('/tasks', methods=['GET'])
+def get_tasks():
+
+    print("Hola")
+    has_access = AuthenticationService.verify_token(request.headers)
+
+    order = request.args.get('order')
+    maxim = request.args.get('max')
+
+    if has_access:
+        user_id = AuthenticationService.get_id_from_token(request.headers)
+        response = VideoUploadService.get_all_tasks(user_id=user_id, order=order, maxim=maxim)
+
+        return response
     else:
         response = jsonify({'message': 'Unauthorized'})
         return response, 401

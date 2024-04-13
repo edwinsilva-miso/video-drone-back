@@ -1,4 +1,6 @@
 from decouple import config
+from flask import jsonify
+
 from src.models.Video import Video, StatusVideo
 from src.models.User import User
 from src.database.declarative_base import Session
@@ -18,7 +20,6 @@ class VideoUploadService:
 
         # These lines are a test for query videos for an user
         user = Session.query(User).filter_by(id=user_id).first()
-        print(user)
 
         if description:
             new_video = Video(
@@ -112,3 +113,21 @@ class VideoUploadService:
         # Release the video capture and writer objects
         cap.release()
         out.release()
+
+    @classmethod
+    def get_all_tasks(cls, user_id, order, maxim=None):
+
+        if order == '0':
+            videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.asc()).limit(maxim).all()
+            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'fecha': video.timestamp} for video in videos]
+            response = videos_dict
+
+        elif order == '1':
+            videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.desc()).limit(maxim).all()
+            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'fecha': video.timestamp} for video in videos]
+            response = videos_dict
+        else:
+            response = jsonify({'message': 'Invalid value for order'})
+            return response, 401
+
+        return jsonify(response)
