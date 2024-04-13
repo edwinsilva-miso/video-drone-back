@@ -24,7 +24,9 @@ def upload_video():
         description = request.values["description"]
 
         random_name = uuid.uuid4().__str__()
-        response = VideoUploadService.upload(description, random_name, '1')
+
+        user_id = AuthenticationService.get_id_from_token(request.headers)
+        response = VideoUploadService.upload(description, random_name, user_id)
 
         asyncio.run(VideoUploadService.save_video(video_file, random_name))  # Use asyncio.run() to execute the coroutine
         return {'status': response}

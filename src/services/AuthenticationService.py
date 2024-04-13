@@ -39,3 +39,9 @@ class AuthenticationService:
     @classmethod
     def verify_token(cls, headers):
         return SecurityUtils.verify_token(headers)
+
+    @classmethod
+    def get_id_from_token(cls, headers):
+
+        data = SecurityUtils.decode_token(headers)
+        return data['user_id']
