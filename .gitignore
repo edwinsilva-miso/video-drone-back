@@ -52,3 +52,6 @@ venv*/
 
 # SQLite files
 *.sqlite
+
+#Videos files
+src/videos/*
