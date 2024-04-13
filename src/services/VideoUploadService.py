@@ -1,12 +1,8 @@
 from decouple import config
-from src.models.Video import Video
+from src.models.Video import Video, StatusVideo
 from src.models.User import User
 from src.database.declarative_base import Session
 import cv2
-
-
-# from src.database.declarative_base import Session
-# from src.models.User import User
 
 
 class VideoUploadService:
@@ -28,7 +24,8 @@ class VideoUploadService:
             new_video = Video(
                 description=description,
                 path=video_path + video_name + '-output.mp4',
-                user_id=user.id
+                user_id=user.id,
+                status=StatusVideo.uploaded
             )
             Session.add(new_video)
             Session.commit()
@@ -42,7 +39,7 @@ class VideoUploadService:
         source_path = config('SOURCE_PATH')
 
         temp_filename = video_path + filename + '.mp4'
-        print(temp_filename)
+
         with open(temp_filename, 'wb') as f:
             while True:
                 chunk = file.read(1024)
@@ -53,8 +50,13 @@ class VideoUploadService:
 
         new_name = video_path + filename + '-output.mp4'
         logo_path = source_path + 'logo.jpeg'
-        print(logo_path)
+
         cls.change_aspect_ratio(temp_filename, new_name, logo_path, logo_path, 30)
+
+        video_processed = Session.query(Video).filter(Video.path == new_name).one_or_none()
+        if video_processed:
+            video_processed.status = StatusVideo.processed
+            Session.commit()
 
     @classmethod
     def change_aspect_ratio(cls, video_path, output_path, start_image_path, end_image_path, num_frames):
