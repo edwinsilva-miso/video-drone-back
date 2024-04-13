@@ -38,7 +38,6 @@ def upload_video():
 @main.route('/tasks', methods=['GET'])
 def get_tasks():
 
-    print("Hola")
     has_access = AuthenticationService.verify_token(request.headers)
 
     order = request.args.get('order')
@@ -48,6 +47,18 @@ def get_tasks():
         user_id = AuthenticationService.get_id_from_token(request.headers)
         response = VideoUploadService.get_all_tasks(user_id=user_id, order=order, maxim=maxim)
 
+        return response
+    else:
+        response = jsonify({'message': 'Unauthorized'})
+        return response, 401
+
+
+@main.route('/tasks/<int:id_task>', methods=['GET'])
+def get_one_tasks(id_task):
+    has_access = AuthenticationService.verify_token(request.headers)
+    print(id_task)
+    if has_access:
+        response = VideoUploadService.get_one_task(id_task=id_task)
         return response
     else:
         response = jsonify({'message': 'Unauthorized'})

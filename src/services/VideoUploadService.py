@@ -119,15 +119,30 @@ class VideoUploadService:
 
         if order == '0':
             videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.asc()).limit(maxim).all()
-            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'fecha': video.timestamp} for video in videos]
+            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'date': video.timestamp} for video in videos]
             response = videos_dict
 
         elif order == '1':
             videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.desc()).limit(maxim).all()
-            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'fecha': video.timestamp} for video in videos]
+            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'date': video.timestamp} for video in videos]
             response = videos_dict
         else:
             response = jsonify({'message': 'Invalid value for order'})
+            return response, 401
+
+        return jsonify(response)
+
+    @classmethod
+    def get_one_task(cls, id_task):
+
+        video = Session.query(Video).filter(Video.id == id_task).first()
+
+        if video is not None:
+            videos_dict = {'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value,
+                           'date': video.timestamp, 'path': video.path}
+            response = videos_dict
+        else:
+            response = jsonify({'message': 'Invalid id task'})
             return response, 401
 
         return jsonify(response)
