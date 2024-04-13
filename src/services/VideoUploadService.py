@@ -5,6 +5,7 @@ from src.models.Video import Video, StatusVideo
 from src.models.User import User
 from src.database.declarative_base import Session
 import cv2
+import os
 
 
 class VideoUploadService:
@@ -24,7 +25,8 @@ class VideoUploadService:
         if description:
             new_video = Video(
                 description=description,
-                path=video_path + video_name + '-output.mp4',
+                video_id=video_name,
+                path='',
                 user_id=user.id,
                 status=StatusVideo.uploaded
             )
@@ -49,14 +51,15 @@ class VideoUploadService:
                 f.write(chunk)
         print(f"Video saved as {temp_filename}")
 
-        new_name = video_path + filename + '-output.mp4'
+        new_video_path = video_path + filename + '-output.mp4'
         logo_path = source_path + 'logo.jpeg'
 
-        cls.change_aspect_ratio(temp_filename, new_name, logo_path, logo_path, 30)
+        cls.change_aspect_ratio(temp_filename, new_video_path, logo_path, logo_path, 30)
 
-        video_processed = Session.query(Video).filter(Video.path == new_name).one_or_none()
+        video_processed = Session.query(Video).filter(Video.video_id == filename).one_or_none()
         if video_processed:
             video_processed.status = StatusVideo.processed
+            video_processed.path = new_video_path,
             Session.commit()
 
     @classmethod
@@ -119,12 +122,14 @@ class VideoUploadService:
 
         if order == '0':
             videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.asc()).limit(maxim).all()
-            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'date': video.timestamp} for video in videos]
+            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value,
+                            'date': video.timestamp} for video in videos]
             response = videos_dict
 
         elif order == '1':
             videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.desc()).limit(maxim).all()
-            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value, 'date': video.timestamp} for video in videos]
+            videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value,
+                            'date': video.timestamp} for video in videos]
             response = videos_dict
         else:
             response = jsonify({'message': 'Invalid value for order'})
@@ -146,3 +151,37 @@ class VideoUploadService:
             return response, 401
 
         return jsonify(response)
+
+    @classmethod
+    def delete_one_task(cls, id_task, user_id):
+        video_path = config('VIDEO_PATH')
+        video = Session.query(Video).filter(Video.id == id_task).first()
+
+        if video is None:
+            response = jsonify({'message': 'Invalid id task'})
+            return response, 401
+
+        if StatusVideo(video.status).name is StatusVideo.uploaded.name:
+            response = jsonify({'message': 'Video is being processed, cannot delete it'})
+            return response
+
+        if video.user_id is not user_id:
+            response = jsonify({'message': 'You are not authorized to delete it'})
+            return response
+
+        if os.path.exists(video.path):
+            os.remove(video.path)
+        else:
+            response = jsonify({'message': 'Video does not exist'})
+            return response
+
+        original_video_path = video_path + video.video_id + ".mp4"
+        if os.path.exists(original_video_path):
+            os.remove(original_video_path)
+        else:
+            response = jsonify({'message': 'Video does not exist'})
+            return response
+
+        Session.delete(video)
+        Session.commit()
+        return 'Video deleted!'
