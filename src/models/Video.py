@@ -1,5 +1,6 @@
+import datetime
 import sqlalchemy
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from src.database.declarative_base import Base
 import enum
@@ -18,5 +19,6 @@ class Video(Base):
     path = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
     status = Column(sqlalchemy.Enum(StatusVideo))
+    timestamp = Column(DateTime, default=datetime.datetime.now())
 
     user = relationship('User', back_populates='videos')
