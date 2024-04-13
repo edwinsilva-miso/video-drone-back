@@ -33,9 +33,12 @@ After that, you can use any database GUI of your preference. Use this BD connect
 
 In the directory /script of the root application, are the scripts to restore the database:
 
-- Currently unavailable
+- [01_ddl_video_drone_db_tables.sql](scripts%2F01_ddl_video_drone_db_tables.sql)
+- [02_dml_roles_202404122015.sql](scripts%2F02_dml_roles_202404122015.sql)
+- [03_dml_videos_202404122015.sql](scripts%2F03_dml_videos_202404122015.sql)
 
 The scripts are ordered by execution, so is required to run them according to this order.
+
 
 ### Queue Messages
 
