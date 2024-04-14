@@ -16,6 +16,7 @@ class SecurityUtils:
             'exp': datetime.datetime.now(tz=cls.tz) + datetime.timedelta(minutes=10),
             'username': authenticated_user.username,
             'fullname': authenticated_user.fullname,
+            'user_id': authenticated_user.id,
             'roles': [authenticated_user.role.role_name]
         }
         return jwt.encode(payload, cls.secret, algorithm="HS256")
@@ -39,3 +40,18 @@ class SecurityUtils:
                     return False
 
             return False
+
+    @classmethod
+    def decode_token(cls, headers):
+        authorization = headers['Authorization']
+        encoded_token = authorization.split(" ")[1]
+        try:
+            payload = jwt.decode(encoded_token, cls.secret, algorithms=["HS256"])
+            return payload
+
+        except jwt.ExpiredSignatureError:
+            print("El token ha expirado.")
+
+        except jwt.InvalidTokenError:
+            print("El token es inválido.")
+
