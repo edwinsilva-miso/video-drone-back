@@ -1,6 +1,7 @@
 from sqlalchemy import and_
 from src.database.declarative_base import Session
-from src.models.User import User, Role
+from src.models.User import User
+from src.models.Role import Role
 from src.utils.SecurityUtils import SecurityUtils
 
 
@@ -25,7 +26,7 @@ class AuthenticationService:
         role = Session.query(Role).filter(Role.role_name == role).first()
         user = Session.query(User).filter(User.email == email).first()
 
-        if role or user is None:
+        if role and user is None:
             new_user = User(
                 fullname=fullname,
                 username=username,

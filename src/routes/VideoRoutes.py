@@ -37,13 +37,12 @@ def upload_video():
 
 @main.route('/tasks', methods=['GET'])
 def get_tasks():
-
     has_access = AuthenticationService.verify_token(request.headers)
 
-    order = request.args.get('order')
-    maxim = request.args.get('max')
-
     if has_access:
+        order = request.args.get('order')
+        maxim = request.args.get('max')
+
         user_id = AuthenticationService.get_id_from_token(request.headers)
         response = VideoUploadService.get_all_tasks(user_id=user_id, order=order, maxim=maxim)
 
@@ -68,9 +67,9 @@ def get_one_tasks(id_task):
 @main.route('/tasks/<int:id_task>', methods=['DELETE'])
 def delete_one_tasks(id_task):
     has_access = AuthenticationService.verify_token(request.headers)
-    user_id = AuthenticationService.get_id_from_token(request.headers)
 
     if has_access:
+        user_id = AuthenticationService.get_id_from_token(request.headers)
         response = VideoUploadService.delete_one_task(id_task=id_task, user_id=user_id)
         return response
     else:
