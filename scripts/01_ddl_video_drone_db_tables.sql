@@ -11,6 +11,7 @@ fullname varchar(255) not null,
 username varchar(30) not null,
 pass varchar(1000) not null,
 role_id integer not null references roles(id),
+email varchar(100) not null,
 primary key(id)
 );
 
@@ -24,3 +25,5 @@ user_id integer not null references users(id),
 status varchar(500) not null,
 timeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE users ADD CONSTRAINT users_unique UNIQUE (email);
