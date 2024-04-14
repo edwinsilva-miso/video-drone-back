@@ -13,6 +13,7 @@ class User(Base):
     username = Column(String)
     password = Column("pass", String)
     role_id = Column(ForeignKey("roles.id"))
+    email = Column(String)
 
     role = relationship('Role', back_populates="users")
 

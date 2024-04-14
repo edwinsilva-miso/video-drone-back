@@ -21,14 +21,17 @@ class AuthenticationService:
         return None
 
     @classmethod
-    def sign_up(cls, fullname, username, password, role):
+    def sign_up(cls, fullname, username, password, role, email):
         role = Session.query(Role).filter(Role.role_name == role).first()
-        if role:
+        user = Session.query(User).filter(User.email == email).first()
+
+        if role or user is None:
             new_user = User(
                 fullname=fullname,
                 username=username,
                 password=password,
-                role=role
+                role=role,
+                email=email
             )
             Session.add(new_user)
             Session.commit()

@@ -25,8 +25,9 @@ def sign_up():
     username = request.json["username"]
     password = request.json["password"]
     role = request.json["role"]
+    email = request.json["email"]
 
-    res = AuthenticationService.sign_up(fullname, username, password, role)
+    res = AuthenticationService.sign_up(fullname, username, password, role, email)
     if res:
         return '', 201
     else:
