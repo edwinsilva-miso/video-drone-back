@@ -55,7 +55,8 @@ $ cd ~/location/video-drone-back
 
 ### Virtual Env
 
-As the project is writen on python, is required to install a new Virtual Environment. For that purpose, we must execute the command:
+As the project is writen on python, is required to install a new Virtual Environment.
+For that purpose, we must execute the command:
 
 ```shell
 $ python -m virtualenv venv
