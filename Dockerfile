@@ -1,12 +1,12 @@
-FROM python:3.11.5
+FROM python:3.12-slim
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY requirements.txt ./
+COPY requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
 
 COPY . .
 
-CMD [ "python3", "-m", "main" ]
+CMD ["python3", "main.py"]
