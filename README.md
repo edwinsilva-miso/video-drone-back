@@ -11,7 +11,7 @@ Rating and Drone Community (Pilots and Fans).
 
 To bring up the application and the database you will run the command:
 ```shell
-docker compose -f docker-compose.yml -p video-drone-back up -d app
+docker-compose -f docker-compose.yml -p video-drone-back up -d
 ```
 
 This will create two docker containers, one called `app`, other `database`. it will take some

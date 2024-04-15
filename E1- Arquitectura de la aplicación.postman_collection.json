@@ -35,7 +35,7 @@
 							"raw": "{\n  \"username\": \"san\",\n  \"password\": \"123\"\n}"
 						},
 						"url": {
-							"raw": "http://127.0.0.1:5000/oauth/token",
+							"raw": "http://127.0.0.1:8080/oauth/token",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -43,7 +43,7 @@
 								"0",
 								"1"
 							],
-							"port": "5000",
+							"port": "8080",
 							"path": [
 								"oauth",
 								"token"
@@ -72,7 +72,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://127.0.0.1:5000/oauth/token",
+									"raw": "http://127.0.0.1:8080/oauth/token",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -80,7 +80,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"oauth",
 										"token"
@@ -132,7 +132,7 @@
 									}
 								},
 								"url": {
-									"raw": "http://127.0.0.1:5000/oauth/token",
+									"raw": "http://127.0.0.1:8080/oauth/token",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -140,7 +140,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"oauth",
 										"token"
@@ -208,7 +208,7 @@
 							]
 						},
 						"url": {
-							"raw": "http://127.0.0.1:5000/api/videos/upload",
+							"raw": "http://127.0.0.1:8080/api/videos/upload",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -216,7 +216,7 @@
 								"0",
 								"1"
 							],
-							"port": "5000",
+							"port": "8080",
 							"path": [
 								"api",
 								"videos",
@@ -254,7 +254,7 @@
 									]
 								},
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/upload",
+									"raw": "http://127.0.0.1:8080/api/videos/upload",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -262,7 +262,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -309,7 +309,7 @@
 									]
 								},
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/upload",
+									"raw": "http://127.0.0.1:8080/api/videos/upload",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -317,7 +317,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -363,7 +363,7 @@
 									]
 								},
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/upload",
+									"raw": "http://127.0.0.1:8080/api/videos/upload",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -371,7 +371,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -407,7 +407,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:5000/oauth/sign-up",
+							"raw": "http://127.0.0.1:8080/oauth/sign-up",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -415,7 +415,7 @@
 								"0",
 								"1"
 							],
-							"port": "5000",
+							"port": "8080",
 							"path": [
 								"oauth",
 								"sign-up"
@@ -459,7 +459,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://127.0.0.1:5000/api/videos/tasks?max=3",
+							"raw": "http://127.0.0.1:8080/api/videos/tasks?max=3",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -467,7 +467,7 @@
 								"0",
 								"1"
 							],
-							"port": "5000",
+							"port": "8080",
 							"path": [
 								"api",
 								"videos",
@@ -495,7 +495,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/tasks?order=0&max=3",
+									"raw": "http://127.0.0.1:8080/api/videos/tasks?order=0&max=3",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -503,7 +503,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -550,7 +550,7 @@
 									}
 								],
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/tasks?order=0",
+									"raw": "http://127.0.0.1:8080/api/videos/tasks?order=0",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -558,7 +558,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -600,7 +600,7 @@
 									}
 								],
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/tasks?max=3",
+									"raw": "http://127.0.0.1:8080/api/videos/tasks?max=3",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -608,7 +608,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -643,7 +643,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://127.0.0.1:5000/api/videos/tasks/6",
+							"raw": "http://127.0.0.1:8080/api/videos/tasks/6",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -651,7 +651,7 @@
 								"0",
 								"1"
 							],
-							"port": "5000",
+							"port": "8080",
 							"path": [
 								"api",
 								"videos",
@@ -686,7 +686,7 @@
 									}
 								],
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/tasks/6",
+									"raw": "http://127.0.0.1:8080/api/videos/tasks/6",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -694,7 +694,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -722,7 +722,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://127.0.0.1:5000/api/videos/tasks/4",
+							"raw": "http://127.0.0.1:8080/api/videos/tasks/4",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -730,7 +730,7 @@
 								"0",
 								"1"
 							],
-							"port": "5000",
+							"port": "8080",
 							"path": [
 								"api",
 								"videos",
@@ -752,7 +752,7 @@
 									}
 								],
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/tasks/6",
+									"raw": "http://127.0.0.1:8080/api/videos/tasks/6",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -760,7 +760,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
@@ -786,7 +786,7 @@
 									}
 								],
 								"url": {
-									"raw": "http://127.0.0.1:5000/api/videos/tasks/5",
+									"raw": "http://127.0.0.1:8080/api/videos/tasks/5",
 									"protocol": "http",
 									"host": [
 										"127",
@@ -794,7 +794,7 @@
 										"0",
 										"1"
 									],
-									"port": "5000",
+									"port": "8080",
 									"path": [
 										"api",
 										"videos",
