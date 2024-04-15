@@ -1,13 +1,42 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  postgres:
-    image: postgres:14-alpine
+  # Flask application service
+  flask_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - 5432:5432
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@database:5432/video-drone
+    depends_on:
+      - database
+    networks:
+      - link
+
+  # PostgreSQL database service
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
     volumes:
-      - ~/apps/postgres:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=video-drone
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+    networks:
+      - link
+
+volumes:
+  pgdata:
+
+networks:
+  link:
+    driver: bridge
