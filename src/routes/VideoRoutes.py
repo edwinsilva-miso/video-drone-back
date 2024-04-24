@@ -28,7 +28,7 @@ def upload_video():
         user_id = AuthenticationService.get_id_from_token(request.headers)
         response = VideoUploadService.upload(description, random_name, user_id)
 
-        asyncio.run(VideoUploadService.save_video(video_file, random_name))
+        VideoUploadService.save_video(video_file, random_name)
         return {'status': response}
     else:
         response = jsonify({'message': 'Unauthorized'})
