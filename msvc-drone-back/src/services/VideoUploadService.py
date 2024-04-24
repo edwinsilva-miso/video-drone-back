@@ -1,10 +1,12 @@
+import base64
+import json
 import os
 
 import pika
 from decouple import config
 from flask import jsonify
 
-from src.database.declarative_base import Session
+from src.database.declarative_base import open_session
 from src.models.User import User
 from src.models.Video import Video, StatusVideo
 
@@ -19,7 +21,9 @@ class VideoUploadService:
         Implement here the video upload process
         """
         # These lines are a test for query videos for an user
-        user = Session.query(User).filter_by(id=user_id).first()
+        session = open_session()
+
+        user = session.query(User).filter_by(id=user_id).first()
 
         if description:
             new_video = Video(
@@ -29,10 +33,12 @@ class VideoUploadService:
                 user_id=user.id,
                 status=StatusVideo.uploaded
             )
-            Session.add(new_video)
-            Session.commit()
+            session.add(new_video)
+            session.commit()
+            session.close()
             return 'Video uploaded!'
 
+        session.close()
         return False
 
     @classmethod
@@ -45,34 +51,27 @@ class VideoUploadService:
         channel.queue_declare(queue='video-drone-queue')
 
         message = {
-            'file': file,
+            'file': base64.b64encode(file.read()).decode('utf-8'),
             'filename': filename
         }
 
         # Send queue message
-        channel.basic_publish(exchange='', routing_key='video-drone-queue', body=message)
+        channel.basic_publish(exchange='', routing_key='video-drone-queue', body=json.dumps(message))
 
         return 'Video sent to process'
 
     @classmethod
-    def update_video_process(cls, filename, status, new_video_path):
-        video_processed = Session.query(Video).filter(Video.video_id == filename).one_or_none()
-        if video_processed:
-            video_processed.status = status
-            video_processed.path = new_video_path,
-            Session.commit()
-
-    @classmethod
     def get_all_tasks(cls, user_id, order, maxim=None):
+        session = open_session()
 
         if order == '0':
-            videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.asc()).limit(maxim).all()
+            videos = session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.asc()).limit(maxim).all()
             videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value,
                             'date': video.timestamp} for video in videos]
             response = videos_dict
 
         elif order == '1':
-            videos = Session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.desc()).limit(maxim).all()
+            videos = session.query(Video).filter(Video.user_id == user_id).order_by(Video.id.desc()).limit(maxim).all()
             videos_dict = [{'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value,
                             'date': video.timestamp} for video in videos]
             response = videos_dict
@@ -84,8 +83,9 @@ class VideoUploadService:
 
     @classmethod
     def get_one_task(cls, id_task):
+        session = open_session()
 
-        video = Session.query(Video).filter(Video.id == id_task).first()
+        video = session.query(Video).filter(Video.id == id_task).first()
 
         if video is not None:
             videos_dict = {'id': video.id, 'description': video.description, 'status': StatusVideo(video.status).value,
@@ -99,8 +99,10 @@ class VideoUploadService:
 
     @classmethod
     def delete_one_task(cls, id_task, user_id):
+        session = open_session()
+
         video_path = config('VIDEO_PATH')
-        video = Session.query(Video).filter(Video.id == id_task).first()
+        video = session.query(Video).filter(Video.id == id_task).first()
 
         if video is None:
             response = jsonify({'message': 'Invalid id task'})
@@ -127,6 +129,7 @@ class VideoUploadService:
             response = jsonify({'message': 'Video does not exist'})
             return response
 
-        Session.delete(video)
-        Session.commit()
+        session.delete(video)
+        session.commit()
+        session.close()
         return 'Video deleted!'

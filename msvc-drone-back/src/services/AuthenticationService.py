@@ -1,5 +1,5 @@
 from sqlalchemy import and_
-from src.database.declarative_base import Session
+from src.database.declarative_base import open_session
 from src.models.User import User
 from src.models.Role import Role
 from src.utils.SecurityUtils import SecurityUtils
@@ -9,7 +9,9 @@ class AuthenticationService:
 
     @classmethod
     def login_user(cls, username, password):
-        authenticated_user = Session.query(User).filter(
+        session = open_session()
+
+        authenticated_user = session.query(User).filter(
             and_(
                 User.username == username,
                 User.password == password
@@ -23,8 +25,10 @@ class AuthenticationService:
 
     @classmethod
     def sign_up(cls, fullname, username, password, role, email):
-        role = Session.query(Role).filter(Role.role_name == role).first()
-        user = Session.query(User).filter(User.email == email).first()
+        session = open_session()
+
+        role = session.query(Role).filter(Role.role_name == role).first()
+        user = session.query(User).filter(User.email == email).first()
 
         if role and user is None:
             new_user = User(
@@ -34,10 +38,12 @@ class AuthenticationService:
                 role=role,
                 email=email
             )
-            Session.add(new_user)
-            Session.commit()
+            session.add(new_user)
+            session.commit()
+            session.close()
             return True
 
+        session.close()
         return False
 
     @classmethod

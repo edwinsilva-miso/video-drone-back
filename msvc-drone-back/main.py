@@ -1,13 +1,13 @@
 from config import configuration
 from src.initialize import init_app
-from src.consumer import VideoStatusConsumer
+from src.consumer.VideoStatusConsumer import consume_channel
 
 import threading
 
 configuration = configuration['development']
 
 if __name__ == '__main__':
-    thread = threading.Thread(target=VideoStatusConsumer.get_video_status)
+    thread = threading.Thread(target=consume_channel.start_consuming)
     thread.daemon = True
     thread.start()
 

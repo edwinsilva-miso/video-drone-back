@@ -16,4 +16,7 @@ engine = create_engine(db_path)
 Session = sessionmaker(bind=engine)
 
 Base = declarative_base()
-Session = Session()
+
+
+def open_session():
+    return Session()

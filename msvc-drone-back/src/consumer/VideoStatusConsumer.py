@@ -1,25 +1,36 @@
+import json
+
 from decouple import config
 
+from src.database.declarative_base import open_session
+from src.models.Video import Video
 from src.services.VideoUploadService import VideoUploadService
 
 import pika
 
 # Establishing queue connection
-rabbit_url = config('RABBITMQ_URL_CONNECTION')
-url_parameters = pika.URLParameters(rabbit_url)
+url_parameters = pika.URLParameters(config('RABBITMQ_URL_CONNECTION'))
 connection = pika.BlockingConnection(url_parameters)
-channel = connection.channel()
-channel.queue_declare(queue='video-drone-queue-status')
+
+consume_channel = connection.channel()
+consume_channel.queue_declare(queue='video-drone-queue-status')
 
 
-def get_video_status():
-    method_frame, header_frame, body = channel.basic_get(queue='video-drone-queue-status', auto_ack=True)
-    if method_frame:
-        message = body.decode('utf-8')
-        if message:
-            content = message.split(": ", 3)
-            filename = content[0]
-            status = content[1]
-            new_video_path = content[2]
+def receive_worker_processing_response(ch, method, properties, body: bytes):
+    json_received = json.loads(body.decode('utf-8'))
 
-            VideoUploadService.update_video_process(filename, status, new_video_path)
+    session = open_session()
+
+    video_processed = session.query(Video).filter(Video.video_id == json_received['filename']).one_or_none()
+    if video_processed:
+        video_processed.status = json_received['video_status']
+        video_processed.path = json_received['new_video_path']
+        session.commit()
+        session.close()
+
+    print('Video processed')
+
+
+consume_channel.basic_consume(queue='video-drone-queue-status',
+                              on_message_callback=receive_worker_processing_response,
+                              auto_ack=True)
