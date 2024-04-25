@@ -49,6 +49,7 @@ MANIFEST
 # Per-project virtualenvs
 venv*/
 .venv*/
+*/venv*/
 
 # SQLite files
 *.sqlite

@@ -4,27 +4,21 @@ from flask import jsonify
 from src.models.VideoStatus import VideoStatus
 
 import cv2
+import base64
 
 
 class VideoProcessingService:
 
     @classmethod
-    def save_video(cls, message):
-        content = message.split(': ', 2)
-        file = content[0]
-        filename = content[1]
-
+    def save_video(cls, file, filename):
+        content = base64.b64decode(file.encode('utf-8'))
         video_path = config('VIDEO_PATH')
         source_path = config('SOURCE_PATH')
 
         temp_filename = video_path + filename + '.mp4'
 
         with open(temp_filename, 'wb') as f:
-            while True:
-                chunk = file.read(1024)
-                if not chunk:
-                    break
-                f.write(chunk)
+            f.write(content)
 
         print(f"Video saved as {temp_filename}")
 
@@ -33,12 +27,11 @@ class VideoProcessingService:
 
         cls.change_aspect_ratio(temp_filename, new_video_path, logo_path, logo_path, 30)
 
-        # Aquí debemos enviar el producer de la respuesta del video
-        return jsonify({
+        return {
             "filename": filename,
-            "status": VideoStatus.processed,
+            "status": VideoStatus.processed.name,
             "path": new_video_path
-        })
+        }
 
     @classmethod
     def change_aspect_ratio(cls, video_path, output_path, start_image_path, end_image_path, num_frames):

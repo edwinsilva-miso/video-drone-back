@@ -17,6 +17,7 @@ consume_channel.queue_declare(queue='video-drone-queue-status')
 
 
 def receive_worker_processing_response(ch, method, properties, body: bytes):
+    print('Update the processed video')
     json_received = json.loads(body.decode('utf-8'))
 
     session = open_session()
@@ -28,7 +29,7 @@ def receive_worker_processing_response(ch, method, properties, body: bytes):
         session.commit()
         session.close()
 
-    print('Video processed')
+    print(f'Video processed: {json_received["filename"]}')
 
 
 consume_channel.basic_consume(queue='video-drone-queue-status',

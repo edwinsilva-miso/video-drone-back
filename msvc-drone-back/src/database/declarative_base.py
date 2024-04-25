@@ -10,7 +10,7 @@ db_user = config('DB_USER')
 db_pass = config('DB_PASS')
 db_host = config('DB_HOST')
 db_database = config('DATABASE')
-db_path = os.environ.get('DATABASE_URL')
+db_path = config('DATABASE_URL')
 
 engine = create_engine(db_path)
 Session = sessionmaker(bind=engine)

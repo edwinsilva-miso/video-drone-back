@@ -17,16 +17,19 @@ consume_channel = connection.channel()
 consume_channel.queue_declare(queue='video-drone-queue')
 
 
+# noinspection PyInterpreter
 def process_video_task(ch, method, properties, body):
     json_received = json.loads(body.decode('utf-8'))
+    file = json_received['file']
+    filename = json_received['filename']
 
-    # TODO process the video
+    response = VideoProcessingService.save_video(file, filename)
 
     # Send queue message
     publish_channel.basic_publish(exchange='', routing_key='video-drone-queue-status', body=json.dumps({
-        'video_status': 'processed',
-        'filename': json_received['filename'],
-        'new_video_path': 'TODO'
+        'video_status': response['status'],
+        'filename': response['filename'],
+        'new_video_path': response['path']
     }))
 
     print(f'Video processed {json_received["filename"]}')

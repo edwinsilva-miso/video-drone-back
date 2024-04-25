@@ -29,7 +29,7 @@ def upload_video():
         response = VideoUploadService.upload(description, random_name, user_id)
 
         VideoUploadService.save_video(video_file, random_name)
-        return {'status': response}
+        return response, 201
     else:
         response = jsonify({'message': 'Unauthorized'})
         return response, 401
