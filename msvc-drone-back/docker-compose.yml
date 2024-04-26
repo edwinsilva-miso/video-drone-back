@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  drone-back:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/video-drone
+      - RABBITMQ_URL_CONNECTION=amqp://admin:admin@127.0.0.1:5672/%2F
+    network_mode: "host"
