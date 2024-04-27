@@ -1,10 +1,8 @@
-from decouple import config
-from flask import jsonify
-
-from src.models.VideoStatus import VideoStatus
-
-import cv2
 import base64
+import cv2
+import os
+from decouple import config
+from src.models.VideoStatus import VideoStatus
 
 
 class VideoProcessingService:
@@ -12,7 +10,7 @@ class VideoProcessingService:
     @classmethod
     def save_video(cls, file, filename):
         content = base64.b64decode(file.encode('utf-8'))
-        video_path = config('VIDEO_PATH')
+        video_path = os.environ.get('VIDEO_PATH')
         source_path = config('SOURCE_PATH')
 
         temp_filename = video_path + filename + '.mp4'
@@ -87,3 +85,21 @@ class VideoProcessingService:
         # Release the video capture and writer objects
         cap.release()
         out.release()
+
+    @classmethod
+    def delete_video(cls, video_path):
+        try:
+            original_video = video_path.replace('-output', '')
+            print(original_video)
+            if os.path.exists(original_video):
+                os.remove(original_video)
+
+            if os.path.exists(video_path):
+                os.remove(video_path)
+            else:
+                print('Video does not exist')
+        except OSError as e:
+            print(f"Failed with: {e.strerror}")
+            print(f"Error code: {e.code}")
+
+        print('Video deleted successfully')

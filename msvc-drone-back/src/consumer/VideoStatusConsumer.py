@@ -1,15 +1,15 @@
 import json
-
-from decouple import config
-
-from src.database.declarative_base import open_session
-from src.models.Video import Video
-from src.services.VideoUploadService import VideoUploadService
+import os
 
 import pika
+from src.database.declarative_base import open_session
+from src.models.Video import Video
 
 # Establishing queue connection
-url_parameters = pika.URLParameters(config('RABBITMQ_URL_CONNECTION'))
+amqp_conn_url = os.environ.get('RABBITMQ_URL_CONNECTION')
+print(f'Connection string: {amqp_conn_url}')
+
+url_parameters = pika.URLParameters(amqp_conn_url)
 connection = pika.BlockingConnection(url_parameters)
 
 consume_channel = connection.channel()

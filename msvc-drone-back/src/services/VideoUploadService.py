@@ -101,7 +101,6 @@ class VideoUploadService:
     def delete_one_task(cls, id_task, user_id):
         session = open_session()
 
-        video_path = config('VIDEO_PATH')
         video = session.query(Video).filter(Video.id == id_task).first()
 
         if video is None:
@@ -116,18 +115,19 @@ class VideoUploadService:
             response = jsonify({'message': 'You are not authorized to delete it'})
             return response
 
-        if os.path.exists(video.path):
-            os.remove(video.path)
-        else:
-            response = jsonify({'message': 'Video does not exist'})
-            return response
+        # Establishing queue connection
+        rabbit_url = config('RABBITMQ_URL_CONNECTION')
+        url_parameters = pika.URLParameters(rabbit_url)
+        connection = pika.BlockingConnection(url_parameters)
+        delete_channel = connection.channel()
+        delete_channel.queue_declare(queue='video-drone-delete-queue')
 
-        original_video_path = video_path + video.video_id + ".mp4"
-        if os.path.exists(original_video_path):
-            os.remove(original_video_path)
-        else:
-            response = jsonify({'message': 'Video does not exist'})
-            return response
+        message = {
+            'video_id': video.video_id,
+            'video_path': video.path
+        }
+        # Send queue message
+        delete_channel.basic_publish(exchange='', routing_key='video-drone-delete-queue', body=json.dumps(message))
 
         session.delete(video)
         session.commit()
