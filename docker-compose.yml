@@ -2,16 +2,34 @@ version: '3.8'
 
 services:
   # Flask application service
-  flask_app:
+  drone-back:
     build:
-      context: .
+      context: ./msvc-drone-back
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@database:5432/video-drone
+      - RABBITMQ_URL_CONNECTION=amqp://admin:admin@rabbitmq:5672/%2F
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - link
+
+  drone-worker:
+    build:
+      context: ./msvc-drone-worker
+      dockerfile: Dockerfile
+    environment:
+      - RABBITMQ_URL_CONNECTION=amqp://admin:admin@rabbitmq:5672/%2F
+    ports:
+      - "8081:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - link
 
@@ -32,11 +50,38 @@ services:
       timeout: 60s
       retries: 5
     networks:
+      link:
+        ipv4_address: 10.5.0.2
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq/
+      - rabbitmq-logs:/var/log/rabbitmq/
+    restart: unless-stopped
+    networks:
       - link
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
 
 volumes:
   pgdata:
+  rabbitmq-data:
+  rabbitmq-logs:
 
 networks:
   link:
     driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
