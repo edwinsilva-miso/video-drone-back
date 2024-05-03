@@ -5,9 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
+#    ports:
+#      - "8080:8080"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/video-drone
       - RABBITMQ_URL_CONNECTION=amqp://admin:admin@127.0.0.1:5672/%2F
+      - DRONE_BUCKET=msvc-drone-bucket
+      - DRONE_PATH_TO_VIDEOS=videos
+      - SECRET_PATH=keyfile.json
     network_mode: "host"

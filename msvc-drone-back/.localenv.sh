@@ -1,0 +1,5 @@
+export DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/video-drone"
+export RABBITMQ_URL_CONNECTION="amqp://admin:admin@127.0.0.1:5672/%2F"
+export DRONE_BUCKET="msvc-drone-bucket"
+export DRONE_PATH_TO_VIDEOS="videos"
+export SECRET_PATH="keyfile.json"
