@@ -22,14 +22,14 @@ def receive_worker_processing_response(ch, method, properties, body: bytes):
 
     session = open_session()
 
-    video_processed = session.query(Video).filter(Video.video_id == json_received['filename']).one_or_none()
+    video_processed = session.query(Video).filter(Video.video_id == json_received['original_file_name']).one_or_none()
     if video_processed:
-        video_processed.status = json_received['video_status']
-        video_processed.path = json_received['new_video_path']
+        video_processed.status = json_received['status']
+        video_processed.path = json_received['new_file_name']
         session.commit()
         session.close()
 
-    print(f'Video processed: {json_received["filename"]}')
+    print(f'Video processed: {json_received["original_file_name"]} into {json_received["new_file_name"]}')
 
 
 consume_channel.basic_consume(queue='video-drone-queue-status',

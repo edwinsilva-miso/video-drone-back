@@ -5,10 +5,15 @@ import os
 import pika
 from decouple import config
 from flask import jsonify
+from google.cloud import storage
 
 from src.database.declarative_base import open_session
 from src.models.User import User
 from src.models.Video import Video, StatusVideo
+
+BUCKET_NAME: str = os.environ.get('DRONE_BUCKET', 'msvc-drone-bucket')
+PATH_TO_VIDEOS: str = os.environ.get('DRONE_PATH_TO_VIDEOS', 'videos')
+SECRET_PATH: str = os.environ.get('SECRET_PATH')
 
 
 class VideoUploadService:
@@ -44,6 +49,11 @@ class VideoUploadService:
     @classmethod
     def save_video(cls, file, filename):
         # Establishing queue connection
+        storage_client = storage.Client.from_service_account_json(SECRET_PATH)
+        bucket = storage_client.bucket(BUCKET_NAME)
+        blob = bucket.blob(f'{PATH_TO_VIDEOS}/{filename}')
+        blob.upload_from_string(file.read(), content_type='video/mp4')
+
         rabbit_url = config('RABBITMQ_URL_CONNECTION')
         url_parameters = pika.URLParameters(rabbit_url)
         connection = pika.BlockingConnection(url_parameters)
@@ -51,7 +61,6 @@ class VideoUploadService:
         channel.queue_declare(queue='video-drone-queue')
 
         message = {
-            'file': base64.b64encode(file.read()).decode('utf-8'),
             'filename': filename
         }
 
@@ -115,19 +124,13 @@ class VideoUploadService:
             response = jsonify({'message': 'You are not authorized to delete it'})
             return response
 
-        # Establishing queue connection
-        rabbit_url = config('RABBITMQ_URL_CONNECTION')
-        url_parameters = pika.URLParameters(rabbit_url)
-        connection = pika.BlockingConnection(url_parameters)
-        delete_channel = connection.channel()
-        delete_channel.queue_declare(queue='video-drone-delete-queue')
+        storage_client = storage.Client.from_service_account_json(SECRET_PATH)
+        bucket = storage_client.bucket(BUCKET_NAME)
+        edited_video = bucket.blob(f'{PATH_TO_VIDEOS}/{video.path}')
+        original_video = bucket.blob(f'{PATH_TO_VIDEOS}/{video.video_id}')
 
-        message = {
-            'video_id': video.video_id,
-            'video_path': video.path
-        }
-        # Send queue message
-        delete_channel.basic_publish(exchange='', routing_key='video-drone-delete-queue', body=json.dumps(message))
+        edited_video.delete()
+        original_video.delete()
 
         session.delete(video)
         session.commit()

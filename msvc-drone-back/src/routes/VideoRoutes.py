@@ -23,7 +23,7 @@ def upload_video():
 
         description = request.values["description"]
 
-        random_name = uuid.uuid4().__str__()
+        random_name = uuid.uuid4().__str__()  # + '.mp4'
 
         user_id = AuthenticationService.get_id_from_token(request.headers)
         response = VideoUploadService.upload(description, random_name, user_id)

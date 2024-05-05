@@ -8,31 +8,26 @@ from src.models.VideoStatus import VideoStatus
 class VideoProcessingService:
 
     @classmethod
-    def save_video(cls, file, filename):
-        content = base64.b64decode(file.encode('utf-8'))
-        video_path = os.environ.get('VIDEO_PATH')
+    def process_video(cls, file_path):
         source_path = config('SOURCE_PATH')
 
-        temp_filename = video_path + filename + '.mp4'
-
-        with open(temp_filename, 'wb') as f:
-            f.write(content)
-
-        print(f"Video saved as {temp_filename}")
-
-        new_video_path = video_path + filename + '-output.mp4'
+        edited_video_name = file_path.split('/')[-1] + '-output.mp4'
+        new_video_path = file_path + '-output.mp4'
         logo_path = source_path + 'logo.jpeg'
 
-        cls.change_aspect_ratio(temp_filename, new_video_path, logo_path, logo_path, 30)
+        cls.change_aspect_ratio(file_path, new_video_path, logo_path)
 
         return {
-            "filename": filename,
-            "status": VideoStatus.processed.name,
-            "path": new_video_path
+            'original_file_path': file_path,
+            'status': VideoStatus.processed.name,
+            'new_file_path': new_video_path,
+            'new_file_name': new_video_path.split('/')[-1],
+            'edited_video_name': edited_video_name,
+            'original_file_name': file_path.split('/')[-1],
         }
 
     @classmethod
-    def change_aspect_ratio(cls, video_path, output_path, start_image_path, end_image_path, num_frames):
+    def change_aspect_ratio(cls, video_path, output_path, image_path, num_frames: int = 30):
         # Read the video file
         cap = cv2.VideoCapture(video_path)
 
@@ -52,11 +47,11 @@ class VideoProcessingService:
         out = cv2.VideoWriter(output_path, fourcc, frame_rate, (new_width, new_height))
 
         # Read start image
-        start_image = cv2.imread(start_image_path)
+        start_image = cv2.imread(image_path)
         start_image = cv2.resize(start_image, (new_width, new_height))
 
         # Read end image
-        end_image = cv2.imread(end_image_path)
+        end_image = cv2.imread(image_path)
         end_image = cv2.resize(end_image, (new_width, new_height))
 
         # Write start frames
@@ -85,21 +80,3 @@ class VideoProcessingService:
         # Release the video capture and writer objects
         cap.release()
         out.release()
-
-    @classmethod
-    def delete_video(cls, video_path):
-        try:
-            original_video = video_path.replace('-output', '')
-            print(original_video)
-            if os.path.exists(original_video):
-                os.remove(original_video)
-
-            if os.path.exists(video_path):
-                os.remove(video_path)
-            else:
-                print('Video does not exist')
-        except OSError as e:
-            print(f"Failed with: {e.strerror}")
-            print(f"Error code: {e.code}")
-
-        print('Video deleted successfully')
