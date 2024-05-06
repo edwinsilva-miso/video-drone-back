@@ -1,9 +1,9 @@
+import uuid
+
 from flask import Blueprint, request, jsonify
 
 from src.services.AuthenticationService import AuthenticationService
 from src.services.VideoUploadService import VideoUploadService
-import uuid
-import asyncio
 
 main = Blueprint('video_blueprint', __name__)
 
