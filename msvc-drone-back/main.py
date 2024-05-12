@@ -1,14 +1,16 @@
+#!/usr/bin/env python3
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from config import configuration
+from src.consumer.VideoStatusConsumer import pull_next_message
 from src.initialize import init_app
-from src.consumer.VideoStatusConsumer import consume_channel
 
-import threading
+configuration = configuration['production']
 
-configuration = configuration['development']
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=pull_next_message, trigger='interval', seconds=13, max_instances=1)
 
-if __name__ == '__main__':
-    thread = threading.Thread(target=consume_channel.start_consuming)
-    thread.daemon = True
-    thread.start()
+app = init_app(configuration)
 
-    init_app(configuration).run(host="0.0.0.0", port=8080)
+with app.app_context():
+    scheduler.start()
