@@ -28,7 +28,10 @@ def upload_video():
         user_id = AuthenticationService.get_id_from_token(request.headers)
         response = VideoUploadService.upload(description, random_name, user_id)
 
-        VideoUploadService.save_video(video_file, random_name)
+        if not response:
+            return jsonify({"success": False}), 400
+
+        VideoUploadService.save_video_to_gcs(video_file, random_name)
         return response, 201
     else:
         response = jsonify({'message': 'Unauthorized'})

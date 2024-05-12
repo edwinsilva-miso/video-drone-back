@@ -10,4 +10,4 @@ RUN apt-get update -y && apt-get install -y iputils-ping
 
 COPY . .
 
-CMD [ "python3", "main.py" ]
+CMD [ "gunicorn", "-w", "1", "-b", "0.0.0.0:9090", "main:app" ]

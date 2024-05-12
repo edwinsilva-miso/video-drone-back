@@ -1,37 +1,50 @@
 import json
+import logging
 import os
 
-import pika
+from google.api_core import retry
+from google.cloud import pubsub_v1
+
 from src.database.declarative_base import open_session
 from src.models.Video import Video
 
-# Establishing queue connection
-amqp_conn_url = os.environ.get('RABBITMQ_URL_CONNECTION')
-print(f'Connection string: {amqp_conn_url}')
+PROJECT_ID: str = os.environ.get('PROJECT_ID')
+VIDEO_PROCESSING_SUBSCRIPTION: str = os.environ.get('VIDEO_PROCESSING_SUBSCRIPTION')
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('SECRET_PATH')
 
-url_parameters = pika.URLParameters(amqp_conn_url)
-connection = pika.BlockingConnection(url_parameters)
-
-consume_channel = connection.channel()
-consume_channel.queue_declare(queue='video-drone-queue-status')
+logging.basicConfig(level=logging.INFO)
 
 
-def receive_worker_processing_response(ch, method, properties, body: bytes):
-    print('Update the processed video')
-    json_received = json.loads(body.decode('utf-8'))
+def pull_next_message():
+    logging.log(level=logging.INFO, msg='getting next message')
 
-    session = open_session()
+    subscriber = pubsub_v1.SubscriberClient()
+    subscription_path = subscriber.subscription_path(PROJECT_ID, VIDEO_PROCESSING_SUBSCRIPTION)
 
-    video_processed = session.query(Video).filter(Video.video_id == json_received['original_file_name']).one_or_none()
-    if video_processed:
-        video_processed.status = json_received['status']
-        video_processed.path = json_received['new_file_name']
-        session.commit()
-        session.close()
+    with subscriber:
+        response = subscriber.pull(
+            request={'subscription': subscription_path, 'max_messages': 1},
+            retry=retry.Retry(deadline=300),
+        )
 
-    print(f'Video processed: {json_received["original_file_name"]} into {json_received["new_file_name"]}')
+        if len(response.received_messages) > 0:
+            message = response.received_messages[0]
 
+            body = message.message.data
+            logging.log(level=logging.INFO, msg=f'Received: {body}.')
+            session = open_session()
+            json_received = json.loads(body.decode('utf-8'))
 
-consume_channel.basic_consume(queue='video-drone-queue-status',
-                              on_message_callback=receive_worker_processing_response,
-                              auto_ack=True)
+            video_processed = session.query(Video).filter(
+                Video.video_id == json_received['original_file_name']).one_or_none()
+            if video_processed:
+                video_processed.status = json_received['status']
+                video_processed.path = json_received['new_file_name']
+                session.commit()
+                session.close()
+
+            # Acknowledges the received messages, so they will not be sent again.
+            subscriber.acknowledge(request={'subscription': subscription_path, 'ack_ids': [message.ack_id]})
+            logging.log(level=logging.INFO, msg=f'Received and acknowledged {len(response.received_messages)} message.')
+        else:
+            logging.log(level=logging.INFO, msg=f'No messages received.')

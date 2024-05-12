@@ -1,11 +1,13 @@
 import base64
+import datetime
 import json
 import os
 
 import pika
 from decouple import config
 from flask import jsonify
-from google.cloud import storage
+from google.api_core.retry import Retry
+from google.cloud import storage, pubsub_v1
 
 from src.database.declarative_base import open_session
 from src.models.User import User
@@ -14,11 +16,12 @@ from src.models.Video import Video, StatusVideo
 BUCKET_NAME: str = os.environ.get('DRONE_BUCKET', 'msvc-drone-bucket')
 PATH_TO_VIDEOS: str = os.environ.get('DRONE_PATH_TO_VIDEOS', 'videos')
 SECRET_PATH: str = os.environ.get('SECRET_PATH')
+VIDEO_UPLOAD_TOPIC: str = os.environ.get('VIDEO_UPLOAD_TOPIC')
+PROJECT_ID: str = os.environ.get('PROJECT_ID')
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = SECRET_PATH
 
 
 class VideoUploadService:
-    video_path = config('VIDEO_PATH')
-    source_path = config('SOURCE_PATH')
 
     @classmethod
     def upload(cls, description, video_name, user_id):
@@ -47,25 +50,21 @@ class VideoUploadService:
         return False
 
     @classmethod
-    def save_video(cls, file, filename):
+    def save_video_to_gcs(cls, file, filename):
         # Establishing queue connection
         storage_client = storage.Client.from_service_account_json(SECRET_PATH)
         bucket = storage_client.bucket(BUCKET_NAME)
         blob = bucket.blob(f'{PATH_TO_VIDEOS}/{filename}')
-        blob.upload_from_string(file.read(), content_type='video/mp4')
-
-        rabbit_url = config('RABBITMQ_URL_CONNECTION')
-        url_parameters = pika.URLParameters(rabbit_url)
-        connection = pika.BlockingConnection(url_parameters)
-        channel = connection.channel()
-        channel.queue_declare(queue='video-drone-queue')
-
-        message = {
-            'filename': filename
-        }
+        blob.upload_from_string(file.read(), content_type='video/mp4', retry=Retry(total=15, backoff_factor=0.1))
 
         # Send queue message
-        channel.basic_publish(exchange='', routing_key='video-drone-queue', body=json.dumps(message))
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(PROJECT_ID, VIDEO_UPLOAD_TOPIC)
+
+        data: dict = {'filename': filename}
+        future = publisher.publish(topic_path, json.dumps(data).encode('utf-8'))
+
+        print(f'published message id {future.result()}')
 
         return 'Video sent to process'
 
